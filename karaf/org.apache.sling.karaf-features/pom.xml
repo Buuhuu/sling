@@ -24,7 +24,7 @@
   <parent>
     <groupId>org.apache.sling</groupId>
     <artifactId>sling</artifactId>
-    <version>27</version>
+    <version>28</version>
     <relativePath/>
   </parent>
 
@@ -37,8 +37,8 @@
 
   <properties>
     <org.apache.karaf.version>4.0.5</org.apache.karaf.version>
-    <org.apache.jackrabbit.version>2.12.2</org.apache.jackrabbit.version>
-    <org.apache.jackrabbit.oak.version>1.5.5</org.apache.jackrabbit.oak.version>
+    <org.apache.jackrabbit.version>2.13.1</org.apache.jackrabbit.version>
+    <org.apache.jackrabbit.oak.version>1.5.7</org.apache.jackrabbit.oak.version>
     <org.apache.tika.version>1.13</org.apache.tika.version>
     <feature.version>0.1.1.SNAPSHOT</feature.version>
   </properties>
@@ -55,12 +55,6 @@
             <id>generate-features-file</id>
             <goals>
               <goal>features-generate-descriptor</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>features-create-kar</id>
-            <goals>
-              <goal>kar</goal>
             </goals>
           </execution>
         </executions>

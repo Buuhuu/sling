@@ -66,13 +66,27 @@ public class VltUtils {
 
     private final static Logger log = LoggerFactory.getLogger(VltUtils.class);
 
-    public static WorkspaceFilter createFilter(DistributionRequest distributionRequest, NavigableMap<String, List<String>> filters) {
+    public static WorkspaceFilter createFilter(DistributionRequest distributionRequest, NavigableMap<String, List<String>> nodeFilters,
+                                               NavigableMap<String, List<String>> propertyFilters) {
         DefaultWorkspaceFilter filter = new DefaultWorkspaceFilter();
 
         for (String path : distributionRequest.getPaths()) {
 
-            PathFilterSet filterSet = createFilterSet(path, filters, distributionRequest);
-            filter.add(filterSet);
+            // Set node path filters
+            List<String> patterns = new ArrayList<String>();
+            patterns.addAll(Arrays.asList(distributionRequest.getFilters(path)));
+            boolean deep = distributionRequest.isDeep(path);
+            PathFilterSet nodeFilterSet = new PathFilterSet(path);
+            if (!deep) {
+                nodeFilterSet.addInclude(new DefaultPathFilter(path));
+            }
+            initFilterSet(nodeFilterSet, nodeFilters, patterns);
+            filter.add(nodeFilterSet);
+
+            // Set property path filters
+            PathFilterSet propertyFilterSet = new PathFilterSet("/");
+            initFilterSet(propertyFilterSet, propertyFilters, new ArrayList<String>());
+            filter.addPropertyFilterSet(propertyFilterSet);
         }
 
         return filter;
@@ -96,25 +110,16 @@ public class VltUtils {
         return paths;
     }
 
-    private static PathFilterSet createFilterSet(String path, NavigableMap<String, List<String>> globalFilters, DistributionRequest distributionRequest) {
-        boolean deep = distributionRequest.isDeep(path);
-        PathFilterSet filterSet = new PathFilterSet(path);
-
-        if (!deep) {
-            filterSet.addInclude(new DefaultPathFilter(path));
-        }
-
-        List<String> patterns = new ArrayList<String>();
+    private static void initFilterSet(PathFilterSet filterSet, NavigableMap<String, List<String>> globalFilters, List<String> patterns) {
 
         // add the most specific filter rules
+        String root = filterSet.getRoot();
         for (String key : globalFilters.descendingKeySet()) {
-            if (path.startsWith(key)) {
+            if (root.startsWith(key)) {
                 patterns.addAll(globalFilters.get(key));
                 break;
             }
         }
-
-        patterns.addAll(Arrays.asList(distributionRequest.getFilters(path)));
 
         for (String pattern : patterns) {
             PathFilterSet.Entry<DefaultPathFilter> entry = extractPathPattern(pattern);
@@ -125,8 +130,6 @@ public class VltUtils {
                 filterSet.addExclude(entry.getFilter());
             }
         }
-
-        return filterSet;
     }
 
 

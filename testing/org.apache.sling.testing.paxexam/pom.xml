@@ -24,12 +24,12 @@
   <parent>
     <groupId>org.apache.sling</groupId>
     <artifactId>sling</artifactId>
-    <version>27</version>
-    <relativePath/>
+    <version>28</version>
+    <relativePath />
   </parent>
 
   <artifactId>org.apache.sling.testing.paxexam</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
   <packaging>bundle</packaging>
 
   <name>Apache Sling Testing PaxExam</name>
@@ -49,15 +49,6 @@
   </scm>
 
   <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-source-plugin</artifactId>
-          <version>3.0.1</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.apache.felix</groupId>

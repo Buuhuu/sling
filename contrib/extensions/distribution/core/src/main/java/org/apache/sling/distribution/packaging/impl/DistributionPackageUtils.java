@@ -166,7 +166,7 @@ public class DistributionPackageUtils {
      * @return a distribution queue item
      */
     public static DistributionQueueItem toQueueItem(DistributionPackage distributionPackage) {
-        return new DistributionQueueItem(distributionPackage.getId(), distributionPackage.getInfo());
+        return new DistributionQueueItem(distributionPackage.getId(), distributionPackage.getSize(), distributionPackage.getInfo());
     }
 
     /**
@@ -275,7 +275,9 @@ public class DistributionPackageUtils {
         }
 
         synchronized (repolock) {
-            resourceResolver.refresh();
+            if (resourceResolver.hasChanges()) {
+                resourceResolver.refresh();
+            }
             packagesRoot = ResourceUtil.getOrCreateResource(resourceResolver, packagesRootPath, "sling:Folder", "sling:Folder", true);
         }
 

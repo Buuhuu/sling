@@ -64,7 +64,7 @@ import org.apache.sling.scripting.sightly.impl.plugin.UsePlugin;
 
 /**
  * <p>
- * The {@link SightlyCompiler} interprets a Sightly script and transforms it internally into a {@link CommandStream}. The
+ * The {@link SightlyCompiler} interprets a HTL script and transforms it internally into a {@link CommandStream}. The
  * {@link CommandStream} can be fed to a {@link BackendCompiler} for transforming the stream into executable code, either by
  * transpiling the commands to a JVM supported language or by directly executing them.
  * </p>
@@ -145,7 +145,7 @@ public final class SightlyCompiler {
                 backendCompiler.handle(optimizedStream);
             }
             frontend.compile(stream, scriptSource);
-            for (PushStream.Warning w : stream.getWarnings()) {
+            for (PushStream.StreamMessage w : stream.getWarnings()) {
                 ScriptError warning = getScriptError(scriptSource, w.getCode(), 0, 0, w.getMessage());
                 compilationResult.getWarnings().add(new CompilerMessageImpl(scriptName, warning.errorMessage, warning.lineNumber, warning
                         .column));

@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.apache.sling</groupId>
         <artifactId>sling</artifactId>
-        <version>26</version>
+        <version>28</version>
         <relativePath/>
     </parent>
 
@@ -31,9 +31,9 @@
     <packaging>slingstart</packaging>
     <version>1.0.5-SNAPSHOT</version>
 
-    <name>Apache Sling Scripting Sightly Integration Tests</name>
-    <description>This project runs the integration tests for validating the Apache Sling Scripting Sightly implementation
-        against the Adobe Sightly TCK.
+    <name>Apache Sling Scripting HTL Integration Tests</name>
+    <description>This project runs the integration tests for validating the Apache Sling Scripting HTL implementation
+        against the Adobe HTL TCK.
     </description>
 
     <scm>
@@ -196,7 +196,7 @@
         <dependency>
             <groupId>io.sightly</groupId>
             <artifactId>io.sightly.tck</artifactId>
-            <version>1.2.3</version>
+            <version>1.2.5</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>

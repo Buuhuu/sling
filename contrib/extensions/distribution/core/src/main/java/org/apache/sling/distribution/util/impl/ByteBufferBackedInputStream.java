@@ -18,8 +18,12 @@
  */
 package org.apache.sling.distribution.util.impl;
 
+import javax.annotation.Nonnull;
+
 import static java.lang.Math.min;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -28,19 +32,34 @@ final class ByteBufferBackedInputStream extends InputStream {
 
     private final ByteBuffer memory;
 
-    public ByteBufferBackedInputStream(ByteBuffer memory) {
+    private final FileInputStream fileInputStream;
+
+    public ByteBufferBackedInputStream(ByteBuffer memory, File file) throws IOException {
         this.memory = memory;
+        if (file != null) {
+            fileInputStream = new FileInputStream(file);
+        } else {
+            fileInputStream = null;
+        }
     }
 
     public int read() throws IOException {
         if (!memory.hasRemaining()) {
+            if (fileInputStream != null) {
+                return fileInputStream.read();
+            }
+
             return -1;
         }
         return memory.get() & 0xFF;
     }
 
-    public int read(byte[] bytes, int off, int len) throws IOException {
+    public int read(@Nonnull byte[] bytes, int off, int len) throws IOException {
         if (!memory.hasRemaining()) {
+            if (fileInputStream != null) {
+                return fileInputStream.read(bytes, off, len);
+            }
+
             return -1;
         }
 

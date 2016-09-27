@@ -29,7 +29,7 @@
 
   <artifactId>org.apache.sling.jcr.repoinit</artifactId>
   <packaging>bundle</packaging>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.3-SNAPSHOT</version>
   <name>Apache Sling RepoInit JCR module</name>
   <description>
 	  Initializes a JCR repository based on the output
@@ -103,7 +103,7 @@
      <dependency>
       <groupId>org.apache.sling</groupId>
       <artifactId>org.apache.sling.repoinit.parser</artifactId>
-      <version>1.0.3-SNAPSHOT</version>
+      <version>1.0.5-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

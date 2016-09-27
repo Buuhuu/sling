@@ -25,7 +25,7 @@
     <parent>
         <groupId>org.apache.sling</groupId>
         <artifactId>sling</artifactId>
-        <version>26</version>
+        <version>28</version>
         <relativePath />
     </parent>
 
@@ -36,12 +36,12 @@
     <version>1.0.7-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
-    <name>Apache Sling Scripting Sightly Integration Tests Content</name>
+    <name>Apache Sling Scripting HTL Integration Tests Content</name>
 
     <description>
         This bundle contains:
-            - Content adapted from the Adobe Sightly TCK meant to test the org.apache.sling.scripting.sightly implementations.
-            - Content meant to test performance of the org.apache.sling.scripting.sightly implementation.
+            - Content adapted from the Adobe HTL TCK meant to test the org.apache.sling.scripting.HTL implementations.
+            - Content meant to test performance of the org.apache.sling.scripting.HTL implementation.
     </description>
 
     <scm>
@@ -100,7 +100,7 @@
                                 <artifactItem>
                                     <groupId>io.sightly</groupId>
                                     <artifactId>io.sightly.tck</artifactId>
-                                    <version>1.2.3</version>
+                                    <version>1.2.5</version>
                                     <type>jar</type>
                                     <outputDirectory>${project.build.directory}/sightlytck/</outputDirectory>
                                     <includes>**/*.html,**/*.js,**/*.java</includes>
@@ -191,7 +191,7 @@
         <!-- Test bundle dependencies -->
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <artifactId>javax.servlet-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.sling</groupId>

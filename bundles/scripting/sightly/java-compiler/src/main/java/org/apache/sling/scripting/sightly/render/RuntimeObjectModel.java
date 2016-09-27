@@ -19,11 +19,11 @@ package org.apache.sling.scripting.sightly.render;
 import java.util.Collection;
 import java.util.Map;
 
-import aQute.bnd.annotation.ProviderType;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * The {@code RuntimeObjectModel} provides various utility object inspection &amp; conversion methods that can be applied to runtime
- * objects when executing Sightly scripts.
+ * objects when executing HTL scripts.
  */
 @ProviderType
 public interface RuntimeObjectModel {

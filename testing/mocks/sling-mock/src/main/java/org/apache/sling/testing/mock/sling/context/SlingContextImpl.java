@@ -46,6 +46,9 @@ import org.apache.sling.models.impl.injectors.SelfInjector;
 import org.apache.sling.models.impl.injectors.SlingObjectInjector;
 import org.apache.sling.models.impl.injectors.ValueMapInjector;
 import org.apache.sling.models.spi.ImplementationPicker;
+import org.apache.sling.resourcebuilder.api.ResourceBuilder;
+import org.apache.sling.resourcebuilder.api.ResourceBuilderFactory;
+import org.apache.sling.resourcebuilder.impl.ResourceBuilderFactoryService;
 import org.apache.sling.settings.SlingSettingsService;
 import org.apache.sling.testing.mock.osgi.context.OsgiContextImpl;
 import org.apache.sling.testing.mock.sling.MockSling;
@@ -57,6 +60,7 @@ import org.apache.sling.testing.mock.sling.services.MockSlingSettingService;
 import org.apache.sling.testing.mock.sling.servlet.MockRequestPathInfo;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
+import org.osgi.annotation.versioning.ConsumerType;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
@@ -67,8 +71,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
-import aQute.bnd.annotation.ConsumerType;
 
 /**
  * Defines Sling context objects with lazy initialization. Should not be used
@@ -93,6 +95,7 @@ public class SlingContextImpl extends OsgiContextImpl {
     protected SlingScriptHelper slingScriptHelper;
     protected ContentLoader contentLoader;
     protected ContentBuilder contentBuilder;
+    protected ResourceBuilder resourceBuilder;
     protected UniqueRoot uniqueRoot;
     
     private Map<String, Object> resourceResolverFactoryActivatorProps;
@@ -172,6 +175,7 @@ public class SlingContextImpl extends OsgiContextImpl {
         // other services
         registerService(SlingSettingsService.class, new MockSlingSettingService(DEFAULT_RUN_MODES));
         registerService(MimeTypeService.class, new MockMimeTypeService());
+        registerInjectActivateService(new ResourceBuilderFactoryService());
     }
 
     /**
@@ -209,6 +213,7 @@ public class SlingContextImpl extends OsgiContextImpl {
         this.slingScriptHelper = null;
         this.contentLoader = null;
         this.contentBuilder = null;
+        this.resourceBuilder = null;
         this.uniqueRoot = null;
         
         super.tearDown();
@@ -293,6 +298,9 @@ public class SlingContextImpl extends OsgiContextImpl {
     }
 
     /**
+     * Creates a {@link ContentBuilder} object for easily creating test content.
+     * This API was part of Sling Mocks since version 1.x.
+     * You can use alternatively the {@link #build()} method and use the {@link ResourceBuilder} API.
      * @return Content builder for building test content
      */
     public ContentBuilder create() {
@@ -300,6 +308,19 @@ public class SlingContextImpl extends OsgiContextImpl {
             this.contentBuilder = new ContentBuilder(resourceResolver());
         }
         return this.contentBuilder;
+    }
+    
+    /**
+     * Creates a {@link ResourceBuilder} object for easily creating test content.
+     * This is a separate API which can be used inside sling mocks or in a running instance.
+     * You can use alternatively the {@link #create()} method to use the {@link ContentBuilder} API.
+     * @return Resource builder for building test content.
+     */
+    public ResourceBuilder build() {
+        if (this.resourceBuilder == null) {
+            this.resourceBuilder = getService(ResourceBuilderFactory.class).forResolver(this.resourceResolver());
+        }
+        return this.resourceBuilder;
     }
 
     /**

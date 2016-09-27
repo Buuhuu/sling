@@ -182,9 +182,7 @@
         <module>bundles/extensions/healthcheck</module>
         <module>bundles/resourceaccesssecurity/core</module>
         <module>bundles/resourceaccesssecurity/it</module>
-        <module>bundles/extensions/models/api</module>
-        <module>bundles/extensions/models/impl</module>
-        <module>bundles/extensions/models/integration-tests</module>
+        <module>bundles/extensions/models</module>
         <module>bundles/extensions/i18n</module>
         <module>bundles/extensions/xss</module>
         <module>bundles/extensions/resourcebuilder</module>
@@ -203,6 +201,7 @@
         <module>installer/factories/deploymentpck</module>
         <module>installer/factories/subsystem_base</module>
         <module>installer/factories/subsystems</module>
+        <module>installer/hc</module>
         <module>installer/it</module>
 
         <!-- Launchpad -->
@@ -223,7 +222,6 @@
             </activation>
             <modules>
                 <module>bundles/extensions/validation</module>
-                <module>bundles/extensions/models/validation-impl</module>
             </modules>
         </profile>
         <profile>
@@ -232,7 +230,8 @@
             -->
             <id>integrationTests</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <!-- activeByDefault is no useful if java8 profile becomes active -->
+                <jdk>[1.6,)</jdk>
             </activation>
             <modules>
                 <module>launchpad/test-services</module>

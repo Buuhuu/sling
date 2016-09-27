@@ -22,12 +22,12 @@
     <parent>
         <groupId>org.apache.sling</groupId>
         <artifactId>sling</artifactId>
-        <version>27</version>
+        <version>28</version>
         <relativePath />
     </parent>
 
     <artifactId>org.apache.sling.resourceresolver</artifactId>
-    <version>1.4.17-SNAPSHOT</version>
+    <version>1.4.19-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <name>Apache Sling Resource Resolver</name>

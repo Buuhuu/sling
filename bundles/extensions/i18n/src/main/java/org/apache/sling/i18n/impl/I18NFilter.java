@@ -47,6 +47,7 @@ import org.apache.felix.scr.annotations.sling.SlingFilter;
 import org.apache.felix.scr.annotations.sling.SlingFilterScope;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.wrappers.SlingHttpServletRequestWrapper;
+import org.apache.sling.commons.osgi.Order;
 import org.apache.sling.commons.osgi.ServiceUtil;
 import org.apache.sling.i18n.DefaultLocaleResolver;
 import org.apache.sling.i18n.LocaleResolver;
@@ -66,7 +67,7 @@ import org.slf4j.LoggerFactory;
 @Properties({
     @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN, value="/"),
     @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT,
-              value = "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=org.apache.sling)"),
+              value = "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)"),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Internationalization Support Filter"),
     @Property(name = Constants.SERVICE_VENDOR, value = "The Apache Software Foundation") })
 public class I18NFilter implements Filter {
@@ -166,14 +167,14 @@ public class I18NFilter implements Filter {
 
     protected void bindResourceBundleProvider(final ResourceBundleProvider provider, final Map<String, Object> props) {
         synchronized ( this.providers ) {
-            this.providers.put(ServiceUtil.getComparableForServiceRanking(props), provider);
+            this.providers.put(ServiceUtil.getComparableForServiceRanking(props, Order.ASCENDING), provider);
             this.sortedProviders = this.providers.values().toArray(new ResourceBundleProvider[this.providers.size()]);
         }
     }
 
     protected void unbindResourceBundleProvider(final ResourceBundleProvider provider, final Map<String, Object> props) {
         synchronized ( this.providers ) {
-            this.providers.remove(ServiceUtil.getComparableForServiceRanking(props));
+            this.providers.remove(ServiceUtil.getComparableForServiceRanking(props, Order.ASCENDING));
             this.sortedProviders = this.providers.values().toArray(new ResourceBundleProvider[this.providers.size()]);
         }
     }

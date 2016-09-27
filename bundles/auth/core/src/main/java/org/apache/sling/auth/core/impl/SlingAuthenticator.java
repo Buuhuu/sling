@@ -45,6 +45,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
@@ -67,17 +68,15 @@ import org.apache.sling.auth.core.spi.AuthenticationHandler;
 import org.apache.sling.auth.core.spi.AuthenticationInfo;
 import org.apache.sling.auth.core.spi.AuthenticationInfoPostProcessor;
 import org.apache.sling.auth.core.spi.DefaultAuthenticationFeedbackHandler;
-import org.apache.sling.commons.osgi.OsgiUtil;
-import org.osgi.framework.AllServiceListener;
+import org.apache.sling.commons.osgi.PropertiesUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.context.ServletContextHelper;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,9 +93,16 @@ import org.slf4j.LoggerFactory;
  * Currently this class does not support multiple handlers for any one request
  * URL.
  */
-@Component(name = "org.apache.sling.engine.impl.auth.SlingAuthenticator", label = "%auth.name", description = "%auth.description", metatype = true)
+@Component(name = "org.apache.sling.engine.impl.auth.SlingAuthenticator",
+           label = "%auth.name",
+           description = "%auth.description", metatype = true)
 @Service(value = { Authenticator.class, AuthenticationSupport.class, ServletRequestListener.class })
-@Property(name = Constants.SERVICE_VENDOR, value = "The Apache Software Foundation")
+@Properties({
+    @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_SELECT, value = "(" + HttpWhiteboardConstants.HTTP_WHITEBOARD_CONTEXT_NAME + "=*)"),
+    @Property(name = HttpWhiteboardConstants.HTTP_WHITEBOARD_LISTENER, value = "true"),
+    @Property(name = Constants.SERVICE_VENDOR, value = "The Apache Software Foundation")
+
+})
 public class SlingAuthenticator implements Authenticator,
         AuthenticationSupport, ServletRequestListener {
 
@@ -207,7 +213,7 @@ public class SlingAuthenticator implements Authenticator,
     private PathBasedHolderCache<AbstractAuthenticationHandlerHolder> authHandlerCache = new PathBasedHolderCache<AbstractAuthenticationHandlerHolder>();
 
     // package protected for access in inner class ...
-    PathBasedHolderCache<AuthenticationRequirementHolder> authRequiredCache = new PathBasedHolderCache<AuthenticationRequirementHolder>();
+    private final PathBasedHolderCache<AuthenticationRequirementHolder> authRequiredCache = new PathBasedHolderCache<AuthenticationRequirementHolder>();
 
     /** The name of the impersonation parameter */
     private String sudoParameterName;
@@ -300,7 +306,7 @@ public class SlingAuthenticator implements Authenticator,
             "javax.servlet.Servlet", plugin, props);
 
         serviceListener = SlingAuthenticatorServiceListener.createListener(
-            bundleContext, this);
+            bundleContext, this.authRequiredCache);
 
         authHandlerTracker = new AuthenticationHandlerTracker(bundleContext,
             authHandlerCache);
@@ -340,10 +346,10 @@ public class SlingAuthenticator implements Authenticator,
 
         authRequiredCache.clear();
 
-        final boolean anonAllowed = OsgiUtil.toBoolean(properties.get(PAR_ANONYMOUS_ALLOWED), DEFAULT_ANONYMOUS_ALLOWED);
+        final boolean anonAllowed = PropertiesUtil.toBoolean(properties.get(PAR_ANONYMOUS_ALLOWED), DEFAULT_ANONYMOUS_ALLOWED);
         authRequiredCache.addHolder(new AuthenticationRequirementHolder("/", !anonAllowed, null));
 
-        String[] authReqs = OsgiUtil.toStringArray(properties.get(PAR_AUTH_REQ));
+        String[] authReqs = PropertiesUtil.toStringArray(properties.get(PAR_AUTH_REQ));
         if (authReqs != null) {
             for (String authReq : authReqs) {
                 if (authReq != null && authReq.length() > 0) {
@@ -353,16 +359,16 @@ public class SlingAuthenticator implements Authenticator,
             }
         }
 
-        final String anonUser = OsgiUtil.toString(properties.get(PAR_ANONYMOUS_USER), "");
+        final String anonUser = PropertiesUtil.toString(properties.get(PAR_ANONYMOUS_USER), "");
         if (anonUser.length() > 0) {
             this.anonUser = anonUser;
-            this.anonPassword = OsgiUtil.toString(properties.get(PAR_ANONYMOUS_PASSWORD), "").toCharArray();
+            this.anonPassword = PropertiesUtil.toString(properties.get(PAR_ANONYMOUS_PASSWORD), "").toCharArray();
         } else {
             this.anonUser = null;
             this.anonPassword = null;
         }
 
-        authUriSuffices = OsgiUtil.toStringArray(properties.get(PAR_AUTH_URI_SUFFIX),
+        authUriSuffices = PropertiesUtil.toStringArray(properties.get(PAR_AUTH_URI_SUFFIX),
             new String[] { DEFAULT_AUTH_URI_SUFFIX });
 
         // don't require authentication for login/logout servlets
@@ -373,12 +379,12 @@ public class SlingAuthenticator implements Authenticator,
 
         // add all registered services
         if (serviceListener != null) {
-            serviceListener.registerServices();
+            serviceListener.registerAllServices();
         }
 
         final String http;
         if (anonAllowed) {
-            http = OsgiUtil.toString(properties.get(PAR_HTTP_AUTH), HTTP_AUTH_PREEMPTIVE);
+            http = PropertiesUtil.toString(properties.get(PAR_HTTP_AUTH), HTTP_AUTH_PREEMPTIVE);
         } else {
             http = HTTP_AUTH_ENABLED;
             log.debug("modified: Anonymous Access is denied thus HTTP Basic Authentication is fully enabled");
@@ -387,7 +393,7 @@ public class SlingAuthenticator implements Authenticator,
         if (HTTP_AUTH_DISABLED.equals(http)) {
             httpBasicHandler = null;
         } else {
-            final String realm = OsgiUtil.toString(properties.get(PAR_REALM_NAME), DEFAULT_REALM);
+            final String realm = PropertiesUtil.toString(properties.get(PAR_REALM_NAME), DEFAULT_REALM);
             httpBasicHandler = new HttpBasicAuthenticationHandler(realm, HTTP_AUTH_ENABLED.equals(http));
         }
     }
@@ -395,6 +401,7 @@ public class SlingAuthenticator implements Authenticator,
     @SuppressWarnings("unused")
     @Deactivate
     private void deactivate(final BundleContext bundleContext) {
+        this.authRequiredCache.clear();
         if (engineAuthHandlerTracker != null) {
             engineAuthHandlerTracker.close();
             engineAuthHandlerTracker = null;
@@ -529,7 +536,7 @@ public class SlingAuthenticator implements Authenticator,
 
         // select path used for authentication handler selection
         final Collection<AbstractAuthenticationHandlerHolder>[] holdersArray = this.authHandlerCache
-                .findApplicableHolder(request);
+                .findApplicableHolders(request);
         final String path = getHandlerSelectionPath(request);
         boolean done = false;
         for (int m = 0; !done && m < holdersArray.length; m++) {
@@ -592,7 +599,7 @@ public class SlingAuthenticator implements Authenticator,
 
         final String path = getHandlerSelectionPath(request);
         final Collection<AbstractAuthenticationHandlerHolder>[] holdersArray = this.authHandlerCache
-                .findApplicableHolder(request);
+                .findApplicableHolders(request);
         for (int m = 0; m < holdersArray.length; m++) {
             final Collection<AbstractAuthenticationHandlerHolder> holderSet = holdersArray[m];
             if (holderSet != null) {
@@ -711,7 +718,7 @@ public class SlingAuthenticator implements Authenticator,
         }
 
         final Collection<AbstractAuthenticationHandlerHolder>[] localArray = this.authHandlerCache
-                .findApplicableHolder(request);
+                .findApplicableHolders(request);
         for (int m = 0; m < localArray.length; m++) {
             final Collection<AbstractAuthenticationHandlerHolder> local = localArray[m];
             if (local != null) {
@@ -905,7 +912,7 @@ public class SlingAuthenticator implements Authenticator,
         }
 
         final Collection<AuthenticationRequirementHolder>[] holderSetArray = authRequiredCache
-                .findApplicableHolder(request);
+                .findApplicableHolders(request);
         for (int m = 0; m < holderSetArray.length; m++) {
             final Collection<AuthenticationRequirementHolder> holders = holderSetArray[m];
             if (holders != null) {
@@ -1175,8 +1182,8 @@ public class SlingAuthenticator implements Authenticator,
             final HttpServletRequest request) {
 
         // HttpService API required attributes
-        request.setAttribute(HttpContext.REMOTE_USER, resolver.getUserID());
-        request.setAttribute(HttpContext.AUTHENTICATION_TYPE, authType);
+        request.setAttribute(ServletContextHelper.REMOTE_USER, resolver.getUserID());
+        request.setAttribute(ServletContextHelper.AUTHENTICATION_TYPE, authType);
 
         // resource resolver for down-stream use
         request.setAttribute(REQUEST_ATTRIBUTE_RESOLVER, resolver);
@@ -1463,7 +1470,7 @@ public class SlingAuthenticator implements Authenticator,
      *
      * @param value The cookie value to quote
      * @return The quoted cookie value
-     * @throws UnsupportedEncodingException 
+     * @throws UnsupportedEncodingException
      * @throws IllegalArgumentException If the cookie value is <code>null</code>
      *             or cannot be quoted, primarily because it contains a quote
      *             sign.
@@ -1481,6 +1488,8 @@ public class SlingAuthenticator implements Authenticator,
             char c = value.charAt(i);
             if (c == '"') {
                 builder.append("\\\"");
+            } else if (c == '@') {
+                builder.append(c);
             } else if (c == 127 || (c < 32 && c != '\t')) {
                 throw new IllegalArgumentException(
                     "Cookie value may not contain CTL character");
@@ -1517,102 +1526,6 @@ public class SlingAuthenticator implements Authenticator,
         }
 
         return builder.toString();
-    }
-
-    private static class SlingAuthenticatorServiceListener implements
-            AllServiceListener {
-
-        private final SlingAuthenticator authenticator;
-
-        private final HashMap<Object, AuthenticationRequirementHolder[]> props = new HashMap<Object, AuthenticationRequirementHolder[]>();
-
-        static SlingAuthenticatorServiceListener createListener(
-                final BundleContext context,
-                final SlingAuthenticator authenticator) {
-            SlingAuthenticatorServiceListener listener = new SlingAuthenticatorServiceListener(
-                authenticator);
-            try {
-                final String filter = "(" + AuthConstants.AUTH_REQUIREMENTS + "=*)";
-                context.addServiceListener(listener, filter);
-                ServiceReference[] refs = context.getAllServiceReferences(null,
-                    filter);
-                if (refs != null) {
-                    for (ServiceReference ref : refs) {
-                        listener.addService(ref);
-                    }
-                }
-                return listener;
-            } catch (InvalidSyntaxException ise) {
-            }
-            return null;
-        }
-
-        private SlingAuthenticatorServiceListener(
-                final SlingAuthenticator authenticator) {
-            this.authenticator = authenticator;
-        }
-
-        @Override
-        public void serviceChanged(final ServiceEvent event) {
-            synchronized ( props ) {
-                // modification of service properties, unregistration of the
-                // service or service properties does not contain requirements
-                // property any longer (new event with type 8 added in OSGi Core
-                // 4.2)
-                if ((event.getType() & (ServiceEvent.MODIFIED
-                    | ServiceEvent.UNREGISTERING | 8)) != 0) {
-                    removeService(event.getServiceReference());
-                }
-
-                // add requirements for newly registered services and for
-                // updated services
-                if ((event.getType() & (ServiceEvent.REGISTERED | ServiceEvent.MODIFIED)) != 0) {
-                    addService(event.getServiceReference());
-                }
-            }
-        }
-
-        void registerServices() {
-            AuthenticationRequirementHolder[][] authReqsList;
-            authReqsList = props.values().toArray(new AuthenticationRequirementHolder[props.size()][]);
-
-            for (AuthenticationRequirementHolder[] authReqs : authReqsList) {
-                registerService(authReqs);
-            }
-        }
-
-        private void registerService(
-                final AuthenticationRequirementHolder[] authReqs) {
-            for (AuthenticationRequirementHolder authReq : authReqs) {
-                authenticator.authRequiredCache.addHolder(authReq);
-            }
-        }
-
-        private void addService(final ServiceReference ref) {
-            final String[] authReqPaths = OsgiUtil.toStringArray(ref.getProperty(PAR_AUTH_REQ));
-
-            ArrayList<AuthenticationRequirementHolder> authReqList = new ArrayList<AuthenticationRequirementHolder>();
-            for (String authReq : authReqPaths) {
-                if (authReq != null && authReq.length() > 0) {
-                    authReqList.add(AuthenticationRequirementHolder.fromConfig(
-                        authReq, ref));
-                }
-            }
-
-            final AuthenticationRequirementHolder[] authReqs = authReqList.toArray(new AuthenticationRequirementHolder[authReqList.size()]);
-
-            registerService(authReqs);
-            props.put(ref.getProperty(Constants.SERVICE_ID), authReqs);
-        }
-
-        private void removeService(final ServiceReference ref) {
-            final AuthenticationRequirementHolder[] authReqs = props.remove(ref.getProperty(Constants.SERVICE_ID));
-            if (authReqs != null) {
-                for (AuthenticationRequirementHolder authReq : authReqs) {
-                    authenticator.authRequiredCache.removeHolder(authReq);
-                }
-            }
-        }
     }
 
     private static class AuthenticationHandlerTracker extends ServiceTracker {
@@ -1668,7 +1581,7 @@ public class SlingAuthenticator implements Authenticator,
         }
 
         private void bindAuthHandler(final Object handler, final ServiceReference ref) {
-            final String paths[] = OsgiUtil.toStringArray(ref.getProperty(AuthenticationHandler.PATH_PROPERTY));
+            final String paths[] = PropertiesUtil.toStringArray(ref.getProperty(AuthenticationHandler.PATH_PROPERTY));
             if (paths != null && paths.length > 0) {
 
                 // generate the holders
