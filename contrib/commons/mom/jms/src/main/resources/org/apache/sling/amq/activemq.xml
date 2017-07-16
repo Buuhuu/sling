@@ -19,12 +19,13 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:amq="http://activemq.apache.org/schema/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
     <!--
      Allows us to use system properties as variables in this configuration file
-    -->
+
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations">
             <value>file:${activemq.conf}/credentials.properties</value>
         </property>
     </bean>
+    -->
     <!--
 
             The <broker> element is used to configure the ActiveMQ broker.
@@ -147,16 +148,18 @@
         <transportConnectors>
             <!--
              DOS protection, limit concurrent connections to 1000 and frame size to 100MB
+
+            <transportConnector name="openwire" uri="tcp://0.0.0.0:61616?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+            <transportConnector name="amqp" uri="amqp://0.0.0.0:5672?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
             -->
-            <transportConnector name="openwire" uri="tcp://0.0.0.0:61616?maximumConnections=1000&wireFormat.maxFrameSize=104857600"/>
-            <transportConnector name="amqp" uri="amqp://0.0.0.0:5672?maximumConnections=1000&wireFormat.maxFrameSize=104857600"/>
         </transportConnectors>
         <!--
          destroy the spring context on shutdown to stop jetty
-        -->
+
         <shutdownHooks>
             <bean xmlns="http://www.springframework.org/schema/beans" class="org.apache.activemq.hooks.SpringContextHook"/>
         </shutdownHooks>
+        -->
     </broker>
     <!--
 
@@ -164,7 +167,8 @@
 
             Take a look at ${ACTIVEMQ_HOME}/conf/jetty.xml for more details
 
-    -->
+
     <import resource="jetty.xml"/>
+    -->
 </beans>
         <!--  END SNIPPET: example  -->
