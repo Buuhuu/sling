@@ -73,43 +73,16 @@
                             activemq-protobuf,
                             activemq-kahadb-store,
                             activemq-jms-pool,
-                            activemq-spring,
-                            activemq-jdbc-store,
-                            xbean-spring,
-                            spring-beans,
-                            spring-core,
-                            spring-context,
-                            aopalliance,
                             hawtbuf,
-                            gson
-                        </Embed-Dependency>
+                            gson</Embed-Dependency>
                         <Import-Package>
-                            org.apache.commons.pool2,
-                            org.apache.commons.pool2.impl,
-                            org.apache.commons.pool2.proxy,
-
-                            org.aspectj*;resolution:=optional,
                             org.apache.activemq.jaas*;resolution:=optional,
                             org.apache.commons.net.ftp*;resolution:=optional,
-                            org.apache.commons.attributes;resolution:=optional,
                             org.apache.geronimo.transaction*;resolution:=optional,
                             org.fusesource.hawtbuf*;resolution:=optional,
                             org.apache.commons.pool2*;resolution:=optional,
                             javax.jmdns*;resolution:=optional,
-                            javax.transaction*;resolution:=optional,
-                            org.apache.geronimo.transaction.manager*;resolution:=optional,
-                            org.springframework*;resolution:=optional,
-                            org.apache.derby.jdbc;resolution:=optional,
-                            com.thoughtworks.qdox*;resolution:=optional,
-                            net.sf.cglib*;resolution:=optional,
-                            org.jruby*;resolution:=optional,
-                            oracle.classloader.util;resolution:=optional,
-                            edu.emory.mathcs.backport.java.util.concurrent;resolution:=optional,
-                            com.sun*;resolution:=optional,
-
                             !org.apache.maven*,
-                            !org.apache.tools.ant*,
-                            !bsh,
                             *
                         </Import-Package>
                         <!--
@@ -189,12 +162,6 @@
         </dependency>
         <dependency>
             <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-spring</artifactId>
-            <version>5.13.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-client</artifactId>
             <version>5.13.2</version>
             <scope>provided</scope>
@@ -218,12 +185,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-jdbc-store</artifactId>
-            <version>5.13.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.apache.activemq.protobuf</groupId>
             <artifactId>activemq-protobuf</artifactId>
             <version>1.1</version>
@@ -234,35 +195,6 @@
             <artifactId>hawtbuf</artifactId>
             <version>1.11</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.xbean</groupId>
-            <artifactId>xbean-spring</artifactId>
-            <version>4.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>2.5.6</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>2.5.6</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>2.5.6</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>aopalliance</groupId>
-            <artifactId>aopalliance</artifactId>
-            <version>1.0</version>
         </dependency>
 
 
