@@ -83,8 +83,15 @@ public class ActiveMQConnectionFactoryService implements ConnectionFactoryServic
 
     @Activate
     public void activate(Config config) {
-        pooledConnectionFactory = new PooledConnectionFactory(config.jms_brokerUri());
-        pooledConnectionFactory.start();
+        // this is to prevent xbean failing to load classpath resources (spring sucks)
+        final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+            pooledConnectionFactory = new PooledConnectionFactory(config.jms_brokerUri());
+            pooledConnectionFactory.start();
+        } finally {
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
+        }
     }
 
 

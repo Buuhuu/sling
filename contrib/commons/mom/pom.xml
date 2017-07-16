@@ -33,6 +33,7 @@
 
     <modules>
         <module>jms</module>
+        <module>jms-xbean</module>
         <module>api</module>
         <module>jobs/core</module>
         <module>jobs/it-services</module>
