@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 @Designate(factory=true, ocd=JobQueueConsumerFactory.Config.class)
 public class JobQueueConsumerFactory implements QueueReader, MessageFilter {
 
-    @ObjectClassDefinition()
+    @ObjectClassDefinition(name = "Apache Sling MoM JobQueueConsumerFactory")
     public @interface Config {
 
         @AttributeDefinition(name = "queue-name")

@@ -153,6 +153,7 @@
 
         -->
         <transportConnectors>
+            <transportConnector name="tcp" uri="tcp://0.0.0.0:61616" />
             <!--
              DOS protection, limit concurrent connections to 1000 and frame size to 100MB
 
