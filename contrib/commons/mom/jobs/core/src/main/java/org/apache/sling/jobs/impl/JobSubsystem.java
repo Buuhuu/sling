@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nonnull;
@@ -150,10 +151,11 @@ public class JobSubsystem  implements JobManager, JobConsumer {
     @Nonnull
     @Override
     public void execute(@Nonnull Job initialState, @Nonnull JobUpdateListener listener, @Nonnull JobCallback callback) {
-        // iterate over the entries. This should cause the entries to come out in natural key order
-        // which should respect any priority applied to the Services via ServiceReference. (TODO: check that is the case)
+        // iterate over the entries. This should respect the ordering of the services. ConcurrentHashMap isn't a SortedMap so we create
+        // a copy before we start iterating.
         // TODO: add a Job controller to the job before executing.
-        for (Map.Entry<ServiceReference<JobConsumer>,JobConsumerHolder> e : registrations.entrySet()) {
+        final Map<ServiceReference<JobConsumer>, JobConsumerHolder> orderedRegistrations = new TreeMap<>(registrations);
+        for (Map.Entry<ServiceReference<JobConsumer>,JobConsumerHolder> e : orderedRegistrations.entrySet()) {
             JobConsumerHolder jobConsumerHolder = e.getValue();
             if (jobConsumerHolder.accept(initialState.getJobType())) {
                 jobConsumerHolder.consumer.execute(initialState, listener, callback);
