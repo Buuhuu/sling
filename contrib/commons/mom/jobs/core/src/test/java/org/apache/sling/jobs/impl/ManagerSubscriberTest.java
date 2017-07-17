@@ -19,7 +19,6 @@
 
 package org.apache.sling.jobs.impl;
 
-import aQute.libg.command.Command;
 import org.apache.sling.jobs.Job;
 import org.apache.sling.jobs.JobUpdate;
 import org.apache.sling.jobs.Types;
@@ -57,7 +56,7 @@ public class ManagerSubscriberTest {
     private QueueManager queueManager;
     private HashMap<org.apache.sling.mom.Types.TopicName, Queue<QueueEntry>> topicQueues;
     private HashMap<org.apache.sling.mom.Types.QueueName, Queue<QueueEntry>> messageQueues;
-    private ManagerSubscriber managerSubscriber;
+    private JobSubsystem.ManagerSubscriber managerSubscriber;
 
     public ManagerSubscriberTest() {
         MockitoAnnotations.initMocks(this);
@@ -108,13 +107,8 @@ public class ManagerSubscriberTest {
         jobStorage = new InMemoryJobStorage();
         jobManager = new JobManagerImpl(jobStorage, messageSender);
 
-        managerSubscriber = new ManagerSubscriber();
-        Field f = managerSubscriber.getClass().getDeclaredField("jobManager");
-        f.setAccessible(true);
-        f.set(managerSubscriber,jobManager);
-
-
-    }
+        managerSubscriber = new JobSubsystem.ManagerSubscriber(jobManager);
+        }
 
     @After
     public void after() {

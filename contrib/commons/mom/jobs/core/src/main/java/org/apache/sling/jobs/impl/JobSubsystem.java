@@ -22,6 +22,9 @@ package org.apache.sling.jobs.impl;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,8 +45,11 @@ import org.apache.sling.jobs.Types;
 import org.apache.sling.jobs.impl.spi.JobStorage;
 import org.apache.sling.jobs.impl.storage.InMemoryJobStorage;
 import org.apache.sling.mom.QueueManager;
+import org.apache.sling.mom.Subscriber;
 import org.apache.sling.mom.TopicManager;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -76,15 +82,23 @@ public class JobSubsystem  implements JobManager, JobConsumer {
     @Reference
     private QueueManager queueManager;
 
+    private ServiceRegistration<Subscriber> managerSubscriberReg;
+
     @Activate
-    public synchronized void activate() {
+    public synchronized void activate(final BundleContext bundleContext) {
         jobStorage = new InMemoryJobStorage();
         messageSender = new OutboundJobUpdateListener(topicManager, queueManager);
         manager = new JobManagerImpl(jobStorage, messageSender);
+
+        final Dictionary<String, Object> managerSubscriberProps = new Hashtable<>();
+        managerSubscriberProps.put(Subscriber.TOPIC_NAMES_PROP, new String[] { "sling/jobupdates" });
+        managerSubscriberReg = bundleContext.registerService(Subscriber.class, new ManagerSubscriber(manager), managerSubscriberProps);
     }
 
     @Deactivate
     public synchronized void deactivate() {
+        managerSubscriberReg.unregister();
+
         for (Map.Entry<ServiceReference<JobConsumer>, JobConsumerHolder> e : registrations.entrySet()) {
             e.getValue().close();
         }
@@ -217,6 +231,23 @@ public class JobSubsystem  implements JobManager, JobConsumer {
         @Override
         public void close() {
             // nothing to do at the moment.
+        }
+    }
+
+    /**
+     * Listens to a topic to retrieve control messages.
+     */
+    protected static class ManagerSubscriber implements Subscriber {
+
+        private final JobUpdateListener updateListener;
+
+        protected ManagerSubscriber(JobUpdateListener updateListener) {
+            this.updateListener = updateListener;
+        }
+
+        @Override
+        public void onMessage(org.apache.sling.mom.Types.TopicName topic, Map<String, Object> message) {
+            updateListener.update(new JobUpdateImpl(message));
         }
     }
 }
