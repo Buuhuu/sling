@@ -34,6 +34,8 @@
     <modules>
         <module>jms</module>
         <module>jms-xbean</module>
+        <module>jms-leveldb</module>
+        <module>jms-leveldb-macosx</module>
         <module>api</module>
         <module>jobs/core</module>
         <module>jobs/it-services</module>
