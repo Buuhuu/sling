@@ -104,7 +104,7 @@
             <replicatedLevelDB
                     directory="activemq-data"
                     replicas="1"
-                    bind="tcp://0.0.0.0:61616"
+                    bind="tcp://0.0.0.0:0"
                     zkAddress="localhost:2181,localhost:2182,localhost:2183"
                     zkPath="/activemq/leveldb-stores"
             />
