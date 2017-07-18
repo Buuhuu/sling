@@ -37,6 +37,7 @@ import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.jms.ConnectionFactoryService;
 import org.apache.sling.mom.MessageFilter;
 import org.apache.sling.mom.QueueManager;
@@ -63,6 +64,9 @@ public class JMSQueueManager implements QueueManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JMSQueueManager.class);
     private static final String NRETRIES = "_nr";
+    // before the DS annotations have been changed to the OSGI standard, the name of queue name property was "queue-name", which is not
+    // possible anymore as dash is not allowed to be used in annotation field names. This property is still read for download compatibility
+    private static final String LEGACY_QUEUE_NAME_PROP = "queue-name";
     private static final Set<String> INTERNAL_PROPS = Collections.singleton(NRETRIES);
 
     @Reference
@@ -172,6 +176,10 @@ public class JMSQueueManager implements QueueManager {
             try {
                 LOGGER.info("Creating Queue holder for {} ", queueReader.getClass());
                 String name = (String) properties.get(QueueReader.QUEUE_NAME_PROP);
+                if (StringUtils.isEmpty(name)) {
+                    // download compatibility to service configuration 1.0.0
+                    name = (String) properties.get(LEGACY_QUEUE_NAME_PROP);
+                }
                 checkNotNull(name, "A valid queue name as property " + QueueReader.QUEUE_NAME_PROP + " is required for QueueReader registration");
                 if (queueReader instanceof MessageFilter) {
                     session = new JMSQueueSession(connection, queueReader, name, (MessageFilter) queueReader, true, 5);

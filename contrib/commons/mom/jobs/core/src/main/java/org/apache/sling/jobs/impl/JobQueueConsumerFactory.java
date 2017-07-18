@@ -60,8 +60,8 @@ public class JobQueueConsumerFactory implements QueueReader, MessageFilter {
     @ObjectClassDefinition(name = "Apache Sling MoM JobQueueConsumerFactory")
     public @interface Config {
 
-        @AttributeDefinition(name = "queue-name")
-        String queuename();
+        @AttributeDefinition(name = "Queue name")
+        String jms_queueName();
     }
 
     private final Logger LOGGER = LoggerFactory.getLogger(JobQueueConsumerFactory.class);

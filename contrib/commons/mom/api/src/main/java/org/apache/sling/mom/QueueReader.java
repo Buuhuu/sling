@@ -37,7 +37,7 @@ public interface QueueReader  {
     /**
      * Configuration property name for QueueReaders implemented using a whiteboard pattern.
      */
-    String QUEUE_NAME_PROP = "queue-name";
+    String QUEUE_NAME_PROP = "jms.queueName";
 
     /**
      * Receive messages from the queue. If the message cant be processed at this time a RequeueMessageException must be thrown to cause the message
